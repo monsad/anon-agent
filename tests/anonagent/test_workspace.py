@@ -84,7 +84,8 @@ def test_xlsx_and_txt_and_skip_already_done(ws):
     (ws.inbox / "notatka.txt").write_text(f"PESEL {PESEL}")
 
     assert [r["dokument"] for r in ws.anonymize_inbox()] == ["DOK_001.xlsx", "DOK_002.txt"]
-    assert ws.anonymize_inbox() == []
+    second = ws.anonymize_inbox()
+    assert len(second) == 1 and "Wcześniej przetworzone: 2" in second[0]["info"]
     assert NIP not in ws.read_document("DOK_001.xlsx") and "100" in ws.read_document("DOK_001.xlsx")
     assert PESEL not in ws.read_document("DOK_002.txt")
 
@@ -148,3 +149,18 @@ def test_inbox_must_differ_from_output_folders(tmp_path):
     workspace = Workspace(tmp_path / "AnonAgent", inbox=same, out=same)
     with pytest.raises(ValueError, match="musi być inny"):
         workspace.anonymize_inbox()
+
+
+def test_unsupported_and_broken_files_are_reported_without_names(ws):
+    (ws.inbox / "umowa Kowalski.doc").write_bytes(b"stary format")
+    (ws.inbox / "zepsuta.docx").write_bytes(b"to nie jest zip")
+    (ws.inbox / "~$umowa.docx").write_bytes(b"plik blokady Worda")
+
+    report = ws.anonymize_inbox()
+
+    assert [r["pominiety_plik"] for r in report] == [".doc", ".docx"]
+    assert "Zapisz jako" in report[0]["powod"] and "Kowalski" not in str(report)
+
+
+def test_empty_inbox_says_where_it_looked(ws):
+    assert "AnonAgent" in ws.anonymize_inbox()[0]["info"]

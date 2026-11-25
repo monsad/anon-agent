@@ -22,6 +22,17 @@ from docagent.anonymizer.tokens import TOKEN_RE, make_token
 W_P, W_T = qn("w:p"), qn("w:t")
 TEXT_SUFFIXES = {".txt", ".md"}
 SUPPORTED = {".docx", ".xlsx", ".pdf", *TEXT_SUFFIXES}
+_SAVE_AS_DOCX = "starszy format Worda; otwórz plik w Wordzie i wybierz Plik → Zapisz jako → Dokument programu Word (*.docx)"
+UNSUPPORTED_HINTS = {
+    ".doc": _SAVE_AS_DOCX,
+    ".rtf": _SAVE_AS_DOCX,
+    ".odt": _SAVE_AS_DOCX,
+    ".xls": "starszy format Excela; zapisz go jako Skoroszyt programu Excel (*.xlsx)",
+    ".ods": "zapisz arkusz jako Skoroszyt programu Excel (*.xlsx)",
+    ".jpg": "zdjęcie lub skan; potrzebny dokument z tekstem (.docx albo PDF z tekstem)",
+    ".jpeg": "zdjęcie lub skan; potrzebny dokument z tekstem (.docx albo PDF z tekstem)",
+    ".png": "zdjęcie lub skan; potrzebny dokument z tekstem (.docx albo PDF z tekstem)",
+}
 # Umowy: wartość kontraktu to tajemnica handlowa, więc kwoty też ukrywamy (domyślnie anonimizator ich nie ukrywa).
 SETTINGS = AnonymizationSettings(enabled_kinds=frozenset(Kind))
 
@@ -116,9 +127,20 @@ class Workspace:
         done = set(state["docs"].values())
         anonymizer = self.anonymizer()
         report = []
+        already_done = 0
+        # Nazw plików modelowi nie podajemy (bywają danymi osobowymi), tylko rozszerzenie.
         for source in sorted(self.inbox.iterdir()):
             suffix = source.suffix.lower()
-            if source.name in done or suffix not in SUPPORTED or source.name.startswith((".", "~$")):
+            if source.is_dir() or source.name.startswith((".", "~$")):
+                continue
+            if source.name in done:
+                already_done += 1
+                continue
+            if suffix not in SUPPORTED:
+                report.append({
+                    "pominiety_plik": suffix or "(bez rozszerzenia)",
+                    "powod": UNSUPPORTED_HINTS.get(suffix, "nieobsługiwany format; obsługiwane: .docx, .xlsx, .pdf, .txt, .md"),
+                })
                 continue
             target_suffix = suffix if suffix in {".docx", ".xlsx"} else ".txt"
             name = f"DOK_{len(state['docs']) + 1:03d}{target_suffix}"
@@ -129,11 +151,19 @@ class Workspace:
                 elif suffix == ".xlsx":
                     _anonymize_xlsx(source, self.safe / name, anonymizer, mapping)
                 else:
-                    result = anonymizer.anonymize(_read_plain(source))
+                    text = _read_plain(source)
+                    if suffix == ".pdf" and not text.strip():
+                        report.append({"pominiety_plik": ".pdf", "powod": "PDF bez warstwy tekstowej (skan). "
+                                       "Zapisz go jako .docx albo przepuść przez OCR."})
+                        continue
+                    result = anonymizer.anonymize(text)
                     mapping.update(result.mapping)
                     (self.safe / name).write_text(result.text)
             except LeakDetected as e:
                 report.append({"dokument": name, "blad": str(e)})
+                continue
+            except Exception as e:  # uszkodzony plik nie może zatrzymać reszty folderu
+                report.append({"pominiety_plik": suffix, "powod": f"nie da się odczytać pliku ({type(e).__name__})"})
                 continue
             state["docs"][name] = source.name
             for token, value in mapping.items():
@@ -141,6 +171,10 @@ class Workspace:
             self._save_state(state)
             counts = Counter(TOKEN_RE.fullmatch(t)["kind"] for t in mapping)
             report.append({"dokument": name, "ukryte": dict(sorted(counts.items()))})
+        if not report:
+            where = f"{self.inbox.parent.name}{os.sep}{self.inbox.name}"
+            report.append({"info": f"Brak nowych plików w folderze z umowami ({where}). "
+                                   f"Wcześniej przetworzone: {already_done}. Użyj list_documents."})
         return report
 
     def check(self, path: Path) -> list[Span]:
