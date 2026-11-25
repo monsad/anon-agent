@@ -14,9 +14,19 @@ Mapa „znacznik → prawdziwa wartość” zostaje na dysku (`~/AnonAgent/.mapa
 
 **[⬇ Pobierz anon-agent.zip](https://github.com/monsad/anon-agent/releases/latest/download/anon-agent.zip)** i rozpakuj go (prawy przycisk → Wyodrębnij wszystko).
 
-**Sposób A, rozszerzenie (polecany):** w Claude Desktop otwórz Ustawienia → Rozszerzenia → Ustawienia zaawansowane → Zainstaluj rozszerzenie i wybierz `anon-agent.mcpb`. Pierwsze uruchomienie trwa kilka minut, bo pobiera polski model językowy.
+**Sposób A, rozszerzenie (polecany):** w Claude Desktop otwórz **Settings → Extensions → Advanced settings → Install Extension…** i wybierz `anon-agent.mcpb` z rozpakowanego folderu (okno wyboru nie widzi plików wewnątrz .zip). Możesz też pobrać [sam plik anon-agent.mcpb](https://github.com/monsad/anon-agent/releases/latest/download/anon-agent.mcpb). Pierwsze uruchomienie trwa kilka minut, bo pobiera polski model językowy.
 
 **Sposób B, Windows:** kliknij dwukrotnie `zainstaluj-anonagent.bat`. Jeśli Windows pokaże „System Windows ochronił komputer”, wybierz Więcej informacji → Uruchom mimo to. Potem zamknij Claude Desktop całkowicie (także ikonę przy zegarze) i uruchom go ponownie.
+
+## Własne foldery
+
+Domyślnie wszystko leży w `AnonAgent` w katalogu domowym. W rozszerzeniu możesz wybrać inne miejsca: **Settings → Extensions → anon-agent → Configure** i wskaż przyciskiem:
+
+- **Folder z umowami**, czyli skąd brać oryginały,
+- **Folder plików zanonimizowanych**, czyli jedyne miejsce, które czyta Claude,
+- **Folder wyników**, czyli gotowe dokumenty z prawdziwymi danymi.
+
+Folder z umowami musi być inny niż dwa pozostałe. Klucz do danych (`.mapa.json`, `.sekret`) zostaje zawsze w `AnonAgent` w katalogu domowym. Przy instalacji przez `.bat` te same miejsca ustawisz zmiennymi `ANONAGENT_INBOX`, `ANONAGENT_SAFE` i `ANONAGENT_OUT`.
 
 ## Użycie
 

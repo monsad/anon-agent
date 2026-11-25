@@ -37,12 +37,19 @@ def _build_detectors() -> list:
     return detectors
 
 
+def _env_path(name: str) -> Path | None:
+    """Folder z ustawień rozszerzenia; pusta wartość albo nierozwinięta zmienna (${...}) = domyślny."""
+    value = os.environ.get(name, "").strip()
+    return Path(value).expanduser() if value and "${" not in value else None
+
+
 class Workspace:
-    def __init__(self, root: Path | None = None):
-        self.root = Path(root or os.environ.get("ANONAGENT_HOME") or Path.home() / "AnonAgent")
-        self.inbox = self.root / "1_wejscie"
-        self.safe = self.root / "2_bezpieczne"
-        self.out = self.root / "3_wyjscie"
+    def __init__(self, root: Path | None = None, inbox: Path | None = None, safe: Path | None = None,
+                 out: Path | None = None):
+        self.root = Path(root or _env_path("ANONAGENT_HOME") or Path.home() / "AnonAgent")
+        self.inbox = Path(inbox or _env_path("ANONAGENT_INBOX") or self.root / "1_wejscie")
+        self.safe = Path(safe or _env_path("ANONAGENT_SAFE") or self.root / "2_bezpieczne")
+        self.out = Path(out or _env_path("ANONAGENT_OUT") or self.root / "3_wyjscie")
         self._state_file = self.root / ".mapa.json"
         self._secret_file = self.root / ".sekret"
         self.dictionary_file = self.root / "slownik.txt"
@@ -51,7 +58,7 @@ class Workspace:
     # --- przygotowanie ---
 
     def init(self) -> None:
-        for folder in (self.inbox, self.safe, self.out):
+        for folder in (self.root, self.inbox, self.safe, self.out):
             folder.mkdir(parents=True, exist_ok=True)
         if not self._secret_file.exists():
             self._secret_file.write_text(secrets.token_hex(32))
@@ -101,6 +108,9 @@ class Workspace:
 
     def anonymize_inbox(self) -> list[dict]:
         """Nowe pliki z 1_wejscie -> 2_bezpieczne/DOK_nnn. Nazwy oryginałów nie wychodzą poza dysk."""
+        if self.inbox.resolve() in (self.safe.resolve(), self.out.resolve()):
+            # Inaczej kolejne uruchomienia brałyby własne wyniki za nowe umowy.
+            raise ValueError("Folder z umowami musi być inny niż folder zanonimizowanych plików i folder wyników.")
         self.init()
         state = self._load_state()
         done = set(state["docs"].values())
@@ -228,7 +238,7 @@ class Workspace:
         else:
             target.write_text(restore(path.read_text(), mapping))
         # Nazwa oryginału bywa danymi osobowymi ("umowa Kowalski.docx"), więc modelowi jej nie podajemy.
-        return f"Przywrócono dane w {name}. Wynik jest w folderze 3_wyjscie."
+        return f"Przywrócono dane w {name}. Wynik jest w folderze wyników."
 
 
 # --- DOCX: podmiana na poziomie w:t, żeby pogrubienia, tabele i style zostały na miejscu ---

@@ -4,8 +4,8 @@ AnonAgent - Claude analizuje Twoje dokumenty, nie widzac danych osobowych
 INSTALACJA (wybierz JEDEN sposob)
 
   A) Rozszerzenie Claude Desktop - polecane, bez terminala
-     1. Otworz Claude Desktop -> Ustawienia -> Rozszerzenia
-        -> Ustawienia zaawansowane -> Zainstaluj rozszerzenie.
+     1. Otworz Claude Desktop -> Settings -> Extensions
+        -> Advanced settings -> Install Extension...
      2. Wybierz plik anon-agent.mcpb i potwierdz.
      3. Pierwsze uruchomienie trwa kilka minut (pobiera polski model jezykowy).
 
@@ -26,6 +26,11 @@ UZYCIE
 
   Nie dolaczaj dokumentu spinaczem do czatu - wtedy trafia do Claude
   bez pseudonimizacji. Wrzucaj go tylko do folderu 1_wejscie.
+
+WLASNE FOLDERY (tylko sposob A)
+  Settings -> Extensions -> anon-agent -> Configure: wybierz folder z umowami,
+  folder plikow zanonimizowanych i folder wynikow. Folder z umowami musi
+  byc inny niz dwa pozostale.
 
 WAZNE
   - Pliki AnonAgent\.mapa.json i AnonAgent\.sekret to klucz do danych.

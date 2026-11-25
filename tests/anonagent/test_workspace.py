@@ -124,3 +124,27 @@ def test_claude_desktop_registration_keeps_other_settings(tmp_path):
     assert set(data["mcpServers"]) == {"inny", "anon-agent"}
     assert data["mcpServers"]["anon-agent"]["args"] == ["-m", "docagent.anonagent.server"]
     assert (tmp_path / "claude_desktop_config.json.bak").exists()
+
+
+def test_folders_can_be_chosen_separately(tmp_path, monkeypatch):
+    monkeypatch.setenv("ANONAGENT_HOME", str(tmp_path / "nowy" / "klucz"))  # jeszcze nie istnieje
+    monkeypatch.setenv("ANONAGENT_INBOX", str(tmp_path / "Umowy"))
+    monkeypatch.setenv("ANONAGENT_SAFE", str(tmp_path / "Zanonimizowane"))
+    monkeypatch.setenv("ANONAGENT_OUT", "${user_config.folder_wynikow}")  # nierozwinięte = domyślny
+    workspace = Workspace()
+    workspace._detectors = [PatternDetector()]
+    workspace.init()  # tak startuje serwer
+    (tmp_path / "Umowy" / "n.txt").write_text(f"PESEL {PESEL}")
+
+    assert [r["dokument"] for r in workspace.anonymize_inbox()] == ["DOK_001.txt"]
+    assert (tmp_path / "Zanonimizowane" / "DOK_001.txt").exists()
+    workspace.restore_document("DOK_001.txt")
+    assert (tmp_path / "nowy" / "klucz" / "3_wyjscie" / "n (wynik).txt").read_text() == f"PESEL {PESEL}"
+    assert (tmp_path / "nowy" / "klucz" / ".mapa.json").exists()
+
+
+def test_inbox_must_differ_from_output_folders(tmp_path):
+    same = tmp_path / "Umowy"
+    workspace = Workspace(tmp_path / "AnonAgent", inbox=same, out=same)
+    with pytest.raises(ValueError, match="musi być inny"):
+        workspace.anonymize_inbox()

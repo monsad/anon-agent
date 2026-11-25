@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "anon-agent",
   "display_name": "AnonAgent — pseudonimizacja dokumentów",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Claude analizuje umowy i faktury, nie widząc danych osobowych. PESEL, NIP, nazwiska, firmy, adresy i kwoty są zastępowane znacznikami na Twoim komputerze i przywracane na końcu.",
   "long_description": "Wrzuć dokumenty (.docx, .xlsx, .pdf, .txt) do folderu AnonAgent/1_wejscie w katalogu domowym. Claude pracuje tylko na wersji ze znacznikami w 2_bezpieczne, a gotowy wynik z prawdziwymi danymi trafia do 3_wyjscie. Mapa znacznik → wartość nie opuszcza komputera. Pierwsze uruchomienie pobiera polski model językowy (kilka minut).",
   "author": {
@@ -13,23 +13,84 @@
     "entry_point": "src/server.py",
     "mcp_config": {
       "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "src/server.py"]
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "src/server.py"
+      ],
+      "env": {
+        "ANONAGENT_INBOX": "${user_config.folder_umow}",
+        "ANONAGENT_SAFE": "${user_config.folder_zanonimizowanych}",
+        "ANONAGENT_OUT": "${user_config.folder_wynikow}"
+      }
     }
   },
   "tools": [
-    {"name": "anonymize_inbox", "description": "Pseudonimizuje nowe pliki z 1_wejscie"},
-    {"name": "list_documents", "description": "Lista dokumentów na znacznikach"},
-    {"name": "read_document", "description": "Treść dokumentu na znacznikach"},
-    {"name": "docx_add_comment", "description": "Komentarz Worda przy wskazanym akapicie"},
-    {"name": "create_document", "description": "Nowy dokument .docx (np. raport z analizy)"},
-    {"name": "restore_document", "description": "Przywraca prawdziwe dane do 3_wyjscie"}
+    {
+      "name": "anonymize_inbox",
+      "description": "Pseudonimizuje nowe pliki z 1_wejscie"
+    },
+    {
+      "name": "list_documents",
+      "description": "Lista dokumentów na znacznikach"
+    },
+    {
+      "name": "read_document",
+      "description": "Treść dokumentu na znacznikach"
+    },
+    {
+      "name": "docx_add_comment",
+      "description": "Komentarz Worda przy wskazanym akapicie"
+    },
+    {
+      "name": "create_document",
+      "description": "Nowy dokument .docx (np. raport z analizy)"
+    },
+    {
+      "name": "restore_document",
+      "description": "Przywraca prawdziwe dane do 3_wyjscie"
+    }
   ],
   "compatibility": {
-    "platforms": ["darwin", "linux", "win32"],
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ],
     "runtimes": {
       "python": ">=3.12,<3.13"
     }
   },
-  "keywords": ["anonimizacja", "pseudonimizacja", "RODO", "PESEL", "umowy"],
-  "license": "MIT"
+  "keywords": [
+    "anonimizacja",
+    "pseudonimizacja",
+    "RODO",
+    "PESEL",
+    "umowy"
+  ],
+  "license": "MIT",
+  "user_config": {
+    "folder_umow": {
+      "type": "directory",
+      "title": "Folder z umowami",
+      "description": "Tu wrzucasz oryginalne dokumenty do pseudonimizacji. Musi być inny niż dwa pozostałe.",
+      "required": false,
+      "default": "${HOME}/AnonAgent/1_wejscie"
+    },
+    "folder_zanonimizowanych": {
+      "type": "directory",
+      "title": "Folder plików zanonimizowanych",
+      "description": "Wersje ze znacznikami zamiast danych. Tylko te pliki czyta Claude.",
+      "required": false,
+      "default": "${HOME}/AnonAgent/2_bezpieczne"
+    },
+    "folder_wynikow": {
+      "type": "directory",
+      "title": "Folder wyników",
+      "description": "Gotowe dokumenty z przywróconymi prawdziwymi danymi i komentarzami.",
+      "required": false,
+      "default": "${HOME}/AnonAgent/3_wyjscie"
+    }
+  }
 }
