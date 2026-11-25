@@ -1,6 +1,6 @@
 [project]
 name = "anon-agent"
-version = "0.2.1"
+version = "0.3.0"
 description = "Serwer MCP: Claude analizuje dokumenty, nie widząc danych osobowych (PESEL, NIP, nazwiska, firmy, kwoty)"
 readme = "README.md"
 license = "MIT"

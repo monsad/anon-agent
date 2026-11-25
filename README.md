@@ -30,9 +30,13 @@ Folder z umowami musi być inny niż dwa pozostałe. Klucz do danych (`.mapa.jso
 
 ## Użycie
 
-1. Wrzuć dokument (.docx, .xlsx, .pdf, .txt) do `AnonAgent/1_wejscie` w katalogu domowym.
-2. Napisz w Claude Desktop, np.: *„Zpseudonimizuj nowe dokumenty, przeanalizuj umowę pod kątem ryzyk dla Zamawiającego, dodaj komentarze do klauzul i przywróć dane.”*
-3. Wynik znajdziesz w `AnonAgent/3_wyjscie`.
+Najprościej podać Claude ścieżkę do pliku, który leży gdziekolwiek:
+
+1. W Eksploratorze kliknij umowę prawym przyciskiem → **Kopiuj jako ścieżkę** (albo zaznacz ją i naciśnij Ctrl+Shift+C).
+2. Napisz w Claude Desktop: *„Zanonimizuj plik ”* i wklej ścieżkę (Ctrl+V), a potem np. *„przeanalizuj ryzyka dla Zamawiającego, dodaj komentarze i przywróć dane”*.
+3. Napisz *„Otwórz folder z wynikami”*, a Claude otworzy go w Eksploratorze.
+
+Możesz też napisać *„Otwórz folder na umowy”*, przeciągnąć tam pliki i poprosić *„Zpseudonimizuj nowe dokumenty”*.
 
 > **Nie dołączaj dokumentu spinaczem do czatu.** Wtedy trafia do Claude bez pseudonimizacji.
 
@@ -47,6 +51,8 @@ Nazwy, których wykrywacz nie złapał, dopisz do słownika: `anonagent dodaj PE
 | Narzędzie | Co robi |
 |---|---|
 | `anonymize_inbox` | pseudonimizuje nowe pliki z `1_wejscie` do `2_bezpieczne/DOK_nnn` |
+| `anonymize_file` | to samo dla pliku wskazanego ścieżką z dowolnego miejsca |
+| `open_folder` | otwiera folder z umowami, zanonimizowanymi albo wynikami w Eksploratorze |
 | `list_documents` | lista dokumentów na znacznikach |
 | `read_document` | treść dokumentu (z komentarzami Worda) |
 | `docx_add_comment` | komentarz Worda przy akapicie z podanym fragmentem |

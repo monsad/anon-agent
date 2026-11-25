@@ -164,3 +164,28 @@ def test_unsupported_and_broken_files_are_reported_without_names(ws):
 
 def test_empty_inbox_says_where_it_looked(ws):
     assert "AnonAgent" in ws.anonymize_inbox()[0]["info"]
+
+
+def test_import_file_from_anywhere(ws, tmp_path):
+    elsewhere = tmp_path / "Pulpit" / "umowa.txt"
+    elsewhere.parent.mkdir()
+    elsewhere.write_text(f"PESEL {PESEL}")
+
+    report = ws.import_file(f'"{elsewhere}"')  # tak wkleja "Kopiuj jako ścieżkę"
+
+    assert report[0]["dokument"] == "DOK_001.txt"
+    assert elsewhere.exists() and (ws.inbox / "umowa.txt").exists()
+    with pytest.raises(FileNotFoundError, match="Kopiuj jako ścieżkę"):
+        ws.import_file(str(tmp_path / "nie-ma.pdf"))
+
+
+def test_open_folder_opens_the_real_path(ws, monkeypatch):
+    opened = []
+    monkeypatch.setattr("docagent.anonagent.workspace.subprocess.Popen", lambda args: opened.append(args))
+    monkeypatch.setattr("docagent.anonagent.workspace.sys.platform", "darwin")
+
+    message = ws.open_folder("wyniki")
+
+    assert opened == [["open", str(ws.out)]] and str(ws.out) in message
+    with pytest.raises(ValueError):
+        ws.open_folder("pulpit")

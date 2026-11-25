@@ -15,7 +15,13 @@ INSTALACJA (wybierz JEDEN sposob)
      Potem zamknij Claude Desktop calkowicie (takze ikone przy zegarze)
      i uruchom ponownie.
 
-UZYCIE
+UZYCIE - NAJPROSCIEJ
+  1. Kliknij umowe prawym przyciskiem -> Kopiuj jako sciezke (Ctrl+Shift+C).
+  2. W Claude Desktop napisz "Zanonimizuj plik " i wklej sciezke (Ctrl+V),
+     a potem co ma zrobic, np. "przeanalizuj ryzyka i przywroc dane".
+  3. Napisz "Otworz folder z wynikami" - Claude otworzy go w Eksploratorze.
+
+UZYCIE - PRZEZ FOLDER
   1. Wrzuc dokumenty (.docx, .xlsx, .pdf, .txt) do folderu
      AnonAgent\1_wejscie w katalogu domowym (C:\Users\<Ty>\AnonAgent).
      Folder powstaje sam przy pierwszym uzyciu.

@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "anon-agent",
   "display_name": "AnonAgent — pseudonimizacja dokumentów",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Claude analizuje umowy i faktury, nie widząc danych osobowych. PESEL, NIP, nazwiska, firmy, adresy i kwoty są zastępowane znacznikami na Twoim komputerze i przywracane na końcu.",
   "long_description": "Wrzuć dokumenty (.docx, .xlsx, .pdf, .txt) do folderu AnonAgent/1_wejscie w katalogu domowym. Claude pracuje tylko na wersji ze znacznikami w 2_bezpieczne, a gotowy wynik z prawdziwymi danymi trafia do 3_wyjscie. Mapa znacznik → wartość nie opuszcza komputera. Pierwsze uruchomienie pobiera polski model językowy (kilka minut).",
   "author": {
@@ -30,6 +30,14 @@
     {
       "name": "anonymize_inbox",
       "description": "Pseudonimizuje nowe pliki z 1_wejscie"
+    },
+    {
+      "name": "anonymize_file",
+      "description": "Pseudonimizuje plik wskazany ścieżką z dowolnego miejsca"
+    },
+    {
+      "name": "open_folder",
+      "description": "Otwiera folder z umowami, zanonimizowanymi albo wynikami"
     },
     {
       "name": "list_documents",

@@ -6,6 +6,9 @@ Mapa znacznik -> prawdziwa wartość leży tylko na dysku (.mapa.json) i nigdy n
 import json
 import os
 import secrets
+import shutil
+import subprocess
+import sys
 from collections import Counter
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -172,9 +175,9 @@ class Workspace:
             counts = Counter(TOKEN_RE.fullmatch(t)["kind"] for t in mapping)
             report.append({"dokument": name, "ukryte": dict(sorted(counts.items()))})
         if not report:
-            where = f"{self.inbox.parent.name}{os.sep}{self.inbox.name}"
-            report.append({"info": f"Brak nowych plików w folderze z umowami ({where}). "
-                                   f"Wcześniej przetworzone: {already_done}. Użyj list_documents."})
+            report.append({"info": f"Brak nowych plików w folderze z umowami: {self.inbox}. "
+                                   f"Wcześniej przetworzone: {already_done}. Użyj list_documents albo open_folder, "
+                                   "żeby otworzyć ten folder użytkownikowi."})
         return report
 
     def check(self, path: Path) -> list[Span]:
@@ -189,6 +192,43 @@ class Workspace:
 
     def review(self) -> dict[str, str]:
         return dict(self._load_state()["mapping"])
+
+    def import_file(self, path: str) -> list[dict]:
+        """Kopiuje wskazany plik (z dowolnego miejsca) do folderu z umowami i od razu go pseudonimizuje."""
+        source = Path(path.strip().strip('"')).expanduser()
+        if not source.is_file():
+            raise FileNotFoundError(
+                "Nie ma takiego pliku. W Eksploratorze kliknij plik prawym przyciskiem → Kopiuj jako ścieżkę "
+                "i wklej całą ścieżkę."
+            )
+        if source.suffix.lower() not in SUPPORTED:
+            hint = UNSUPPORTED_HINTS.get(source.suffix.lower(), "obsługiwane: .docx, .xlsx, .pdf, .txt, .md")
+            raise ValueError(f"Nie obsługuję plików {source.suffix or 'bez rozszerzenia'}: {hint}.")
+        self.init()
+        target = self.inbox / source.name
+        if source.resolve() != target.resolve():
+            n = 2
+            while target.exists() and target.read_bytes() != source.read_bytes():
+                target = self.inbox / f"{source.stem} ({n}){source.suffix}"
+                n += 1
+            shutil.copy2(source, target)
+        return self.anonymize_inbox()
+
+    def folders(self) -> dict[str, str]:
+        self.init()
+        return {"umowy": str(self.inbox), "zanonimizowane": str(self.safe), "wyniki": str(self.out)}
+
+    def open_folder(self, which: str = "umowy") -> str:
+        """Otwiera folder w Eksploratorze / Finderze, żeby nie trzeba było go szukać."""
+        folders = self.folders()
+        if which not in folders:
+            raise ValueError(f"Nieznany folder {which!r}. Do wyboru: {', '.join(folders)}.")
+        path = folders[which]
+        if sys.platform == "win32":
+            os.startfile(path)  # type: ignore[attr-defined]
+        else:
+            subprocess.Popen(["open" if sys.platform == "darwin" else "xdg-open", path])
+        return f"Otworzyłem folder „{which}”: {path}"
 
     # --- dokumenty po stronie bezpiecznej (to widzi model) ---
 

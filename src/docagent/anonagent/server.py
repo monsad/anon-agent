@@ -10,7 +10,9 @@ from docagent.anonagent.workspace import Workspace
 INSTRUCTIONS = """Dokumenty są spseudonimizowane: dane osobowe i firmowe zastąpiono znacznikami w nawiasach \
 kwadratowych, np. [PERSON_1a2b3c4d]. Używaj znaczników dosłownie i nie próbuj zgadywać prawdziwych wartości. \
 Typowa kolejność: anonymize_inbox -> list_documents -> read_document -> docx_add_comment / create_document \
--> restore_document (prawdziwe dane trafiają wtedy do folderu wyników, a Ty dostajesz tylko potwierdzenie)."""
+-> restore_document (prawdziwe dane trafiają wtedy do folderu wyników, a Ty dostajesz tylko potwierdzenie). \
+Gdy użytkownik poda ścieżkę do pliku, użyj anonymize_file. Gdy nie wie, gdzie wrzucić umowę albo gdzie jest wynik, \
+użyj open_folder. Nigdy nie proś o wklejenie treści umowy do czatu ani o dołączenie jej spinaczem."""
 
 server = MCPServer("anon-agent", instructions=INSTRUCTIONS)
 workspace = Workspace()
@@ -34,6 +36,20 @@ def anonymize_inbox() -> list[dict]:
     """Pseudonimizuje nowe pliki z folderu z umowami i zapisuje je jako DOK_nnn w folderze zanonimizowanych.
     Zwraca nazwy dokumentów i liczbę ukrytych danych każdego rodzaju."""
     return workspace.anonymize_inbox()
+
+
+@_tool
+def anonymize_file(path: str) -> list[dict]:
+    """Pseudonimizuje plik wskazany pełną ścieżką z dowolnego miejsca na dysku, np. 'C:\\Users\\Anna\\Desktop\\umowa.pdf'.
+    Kopiuje go do folderu z umowami; oryginał zostaje na miejscu."""
+    return workspace.import_file(path)
+
+
+@_tool
+def open_folder(which: str = "umowy") -> str:
+    """Otwiera folder w Eksploratorze plików u użytkownika: 'umowy' (tu wrzuca dokumenty),
+    'zanonimizowane' (wersje ze znacznikami) albo 'wyniki' (gotowe dokumenty z prawdziwymi danymi)."""
+    return workspace.open_folder(which)
 
 
 @_tool
