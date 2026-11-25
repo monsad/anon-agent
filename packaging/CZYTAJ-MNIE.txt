@@ -1,0 +1,33 @@
+AnonAgent - Claude analizuje Twoje dokumenty, nie widzac danych osobowych
+=========================================================================
+
+INSTALACJA (wybierz JEDEN sposob)
+
+  A) Rozszerzenie Claude Desktop - polecane, bez terminala
+     1. Otworz Claude Desktop -> Ustawienia -> Rozszerzenia
+        -> Ustawienia zaawansowane -> Zainstaluj rozszerzenie.
+     2. Wybierz plik anon-agent.mcpb i potwierdz.
+     3. Pierwsze uruchomienie trwa kilka minut (pobiera polski model jezykowy).
+
+  B) Windows, jesli A nie zadziala
+     Dwuklik na zainstaluj-anonagent.bat. Gdy Windows pokaze
+     "System Windows ochronil komputer": Wiecej informacji -> Uruchom mimo to.
+     Potem zamknij Claude Desktop calkowicie (takze ikone przy zegarze)
+     i uruchom ponownie.
+
+UZYCIE
+  1. Wrzuc dokumenty (.docx, .xlsx, .pdf, .txt) do folderu
+     AnonAgent\1_wejscie w katalogu domowym (C:\Users\<Ty>\AnonAgent).
+     Folder powstaje sam przy pierwszym uzyciu.
+  2. W Claude Desktop napisz np.:
+     "Zpseudonimizuj nowe dokumenty, przeanalizuj umowe pod katem ryzyk
+      dla Zamawiajacego, dodaj komentarze do klauzul i przywroc dane."
+  3. Gotowy dokument z prawdziwymi danymi znajdziesz w AnonAgent\3_wyjscie.
+
+  Nie dolaczaj dokumentu spinaczem do czatu - wtedy trafia do Claude
+  bez pseudonimizacji. Wrzucaj go tylko do folderu 1_wejscie.
+
+WAZNE
+  - Pliki AnonAgent\.mapa.json i AnonAgent\.sekret to klucz do danych.
+    Nie wysylaj ich nikomu.
+  - Liczby w komorkach Excela nie sa ukrywane (tylko tekst).

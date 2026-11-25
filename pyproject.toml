@@ -1,0 +1,34 @@
+[project]
+name = "anon-agent"
+version = "0.1.0"
+description = "Serwer MCP: Claude analizuje dokumenty, nie widząc danych osobowych (PESEL, NIP, nazwiska, firmy, kwoty)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Monika Sadlok" }]
+dependencies = [
+    "pypdf>=5",
+    "openpyxl>=3.1",
+    "python-docx>=1.2",
+]
+
+[project.optional-dependencies]
+ner = ["spacy>=3.8,<3.9"]
+mcp = ["mcp>=2.3"]
+
+[project.scripts]
+anonagent = "docagent.anonagent.cli:main"
+anonagent-mcp = "docagent.anonagent.server:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/docagent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
